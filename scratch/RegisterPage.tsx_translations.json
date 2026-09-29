@@ -1,0 +1,26 @@
+{
+  "en": {
+    "farmerFirstEcosystem": "Farmer-First Ecosystem",
+    "createAccountTitle": "Create your KrishiVaani Account",
+    "joinSubtitle": "Join thousands of verified farmers & institutional buyers across Maharashtra",
+    "selectRoleLabel": "Select your platform role",
+    "alreadyRegistered": "Already registered with KrishiVaani?",
+    "signInLink": "Sign in to your account"
+  },
+  "mr": {
+    "farmerFirstEcosystem": "शेतकरी-प्रथम परिसंस्था",
+    "createAccountTitle": "तुमचे कृषीवाणी खाते तयार करा",
+    "joinSubtitle": "महाराष्ट्रातील हजारो सत्यापित शेतकरी आणि संस्थात्मक खरेदीदारांमध्ये सामील व्हा",
+    "selectRoleLabel": "तुमची प्लॅटफॉर्म भूमिका निवडा",
+    "alreadyRegistered": "कृषीवाणीवर आधीपासून नोंदणीकृत आहात?",
+    "signInLink": "तुमच्या खात्यात साइन इन करा"
+  },
+  "hi": {
+    "farmerFirstEcosystem": "किसान-प्रथम पारिस्थितिकी तंत्र",
+    "createAccountTitle": "अपना कृषीवाणी खाता बनाएं",
+    "joinSubtitle": "महाराष्ट्र भर के हजारों सत्यापित किसानों और संस्थागत खरीदारों से जुड़ें",
+    "selectRoleLabel": "अपनी प्लेटफॉर्म भूमिका चुनें",
+    "alreadyRegistered": "कृषीवाणी पर पहले से पंजीकृत हैं?",
+    "signInLink": "अपने खाते में साइन इन करें"
+  }
+}

@@ -1,0 +1,32 @@
+{
+  "en": {
+    "sellWaitFarmerAdvisory": "FARMER ADVISORY",
+    "sellWaitTimingGuide": "TIMING GUIDE",
+    "sellWaitPageTitle": "Sell Now or Wait?",
+    "sellWaitPageDescription": "Use current price, market trends, weather, crop condition and storage information to compare your options.",
+    "sellWaitWeatherMandiSync": "WEATHER & MANDI SYNC",
+    "sellWaitImdAdvisory": "IMD Pune Agro-Met Advisory Live",
+    "sellWaitFeaturesSub1": "● Simple Selling-Time Decision Assistant • Real-Time Mandi Data Active",
+    "sellWaitFeaturesSub2": "Weather synced with IMD Pune Agro-Met Advisory"
+  },
+  "mr": {
+    "sellWaitFarmerAdvisory": "शेतकरी सल्ला",
+    "sellWaitTimingGuide": "वेळ मार्गदर्शक",
+    "sellWaitPageTitle": "आता विकावे की वाट पाहावी?",
+    "sellWaitPageDescription": "तुमचे पर्याय तपासण्यासाठी सध्याची किंमत, बाजार कल, हवामान, पिकाची स्थिती आणि साठवणूक माहिती वापरा.",
+    "sellWaitWeatherMandiSync": "हवामान आणि बाजार सिंक",
+    "sellWaitImdAdvisory": "IMD पुणे कृषी-हवामान सल्ला थेट",
+    "sellWaitFeaturesSub1": "● सोपे विक्री-वेळ निर्णय सहाय्यक • रिअल-टाइम बाजार डेटा सक्रिय",
+    "sellWaitFeaturesSub2": "IMD पुणे कृषी-हवामान सल्ल्यानुसार हवामान सिंक केले"
+  },
+  "hi": {
+    "sellWaitFarmerAdvisory": "किसान सलाह",
+    "sellWaitTimingGuide": "समय मार्गदर्शिका",
+    "sellWaitPageTitle": "अभी बेचें या प्रतीक्षा करें?",
+    "sellWaitPageDescription": "अपने विकल्पों की तुलना करने के लिए वर्तमान मूल्य, बाजार के रुझान, मौसम, फसल की स्थिति और भंडारण जानकारी का उपयोग करें।",
+    "sellWaitWeatherMandiSync": "मौसम और मंडी सिंक",
+    "sellWaitImdAdvisory": "IMD पुणे कृषि-मौसम सलाह लाइव",
+    "sellWaitFeaturesSub1": "● सरल बिक्री-समय निर्णय सहायक • रीयल-टाइम मंडी डेटा सक्रिय",
+    "sellWaitFeaturesSub2": "IMD पुणे कृषि-मौसम सलाह के साथ मौसम सिंक किया गया"
+  }
+}

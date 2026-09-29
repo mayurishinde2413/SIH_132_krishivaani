@@ -1,0 +1,365 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  FARMER
+  BUYER
+}
+
+enum RescueStatus {
+  OPEN
+  IN_PROGRESS
+  RESOLVED
+}
+
+enum OfferStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+enum TransactionStatus {
+  INITIATED
+  COMPLETED
+  CANCELLED
+}
+
+enum LotStatus {
+  DRAFT
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  FULFILLED
+}
+
+// ─── USER & PROFILES ─────────────────────────────────────────────────────────
+
+model User {
+  id           Int       @id @default(autoincrement())
+  email        String?   @unique
+  phone        String    @unique
+  passwordHash String
+  name         String
+  role         Role
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  farmer       Farmer?
+  buyer        Buyer?
+
+  @@index([email])
+  @@index([phone])
+  @@index([role])
+}
+
+model Farmer {
+  id          Int      @id @default(autoincrement())
+  userId      Int      @unique
+  village     String?
+  taluka      String?  // Taluka / Tehsil
+  district    String?
+  state       String?  @default("Maharashtra")
+  landHolding Float?   // in acres
+  primaryCrop String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  inventory   FarmerInventory[]
+  fpoMembers  FPOMember[]
+  rescueCases RescueCase[]
+  lotMembers  FPOLotMember[]
+
+  @@index([district])
+}
+
+model Buyer {
+  id                Int      @id @default(autoincrement())
+  userId            Int      @unique
+  companyName       String?  // Business / Organization Name
+  contactPerson     String?
+  businessType      String?  // Buyer Type: Retailer, Wholesaler, Processor, etc.
+  gstNumber         String?  // GST / Trade License
+  warehouseLocation String?  // Primary Delivery / Warehouse Location
+  district          String?
+  state             String?  @default("Maharashtra")
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  user         User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  requirements BuyerRequirement[]
+  offers       BuyerOffer[]
+  fpoLots      FPOLot[]
+
+  @@index([district])
+}
+
+// ─── CROPS & MARKETS ─────────────────────────────────────────────────────────
+
+model Crop {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  localName   String?  // regional name
+  category    String?  // Vegetable, Grain, etc.
+  unit        String   @default("quintal") // unit of measure
+  imageUrl    String?
+  createdAt   DateTime @default(now())
+
+  marketPrices     MarketPrice[]
+  marketArrivals   MarketArrival[]
+  farmerInventory  FarmerInventory[]
+  buyerRequirements BuyerRequirement[]
+  rescueCases      RescueCase[]
+  fpoLots          FPOLot[]
+
+  @@index([category])
+}
+
+model Market {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  district    String
+  state       String   @default("Maharashtra")
+  latitude    Float?
+  longitude   Float?
+  type        String?  // APMC, Mandi, Retail
+  createdAt   DateTime @default(now())
+
+  marketPrices   MarketPrice[]
+  marketArrivals MarketArrival[]
+
+  @@index([district])
+}
+
+model MarketPrice {
+  id          Int      @id @default(autoincrement())
+  marketId    Int
+  cropId      Int
+  minPrice    Float    // Rs per quintal
+  maxPrice    Float
+  modalPrice  Float
+  priceDate   DateTime
+  createdAt   DateTime @default(now())
+
+  market      Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  crop        Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@index([marketId, cropId])
+  @@index([priceDate])
+}
+
+model MarketArrival {
+  id             Int      @id @default(autoincrement())
+  marketId       Int
+  cropId         Int
+  arrivalQty     Float    // in quintals
+  arrivalDate    DateTime
+  createdAt      DateTime @default(now())
+
+  market         Market   @relation(fields: [marketId], references: [id], onDelete: Cascade)
+  crop           Crop     @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@index([marketId, cropId])
+  @@index([arrivalDate])
+}
+
+// ─── FPO ─────────────────────────────────────────────────────────────────────
+
+model FPO {
+  id            Int       @id @default(autoincrement())
+  name          String    @unique
+  district      String
+  state         String    @default("Maharashtra")
+  contactPerson String?
+  contactPhone  String?
+  registrationNo String?
+  createdAt     DateTime  @default(now())
+
+  members       FPOMember[]
+  lots          FPOLot[]
+}
+
+model FPOMember {
+  id        Int      @id @default(autoincrement())
+  fpoId     Int
+  farmerId  Int
+  joinedAt  DateTime @default(now())
+
+  fpo       FPO     @relation(fields: [fpoId], references: [id], onDelete: Cascade)
+  farmer    Farmer  @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@unique([fpoId, farmerId])
+}
+
+// ─── INVENTORY & TRADE ───────────────────────────────────────────────────────
+
+model FarmerInventory {
+  id          Int      @id @default(autoincrement())
+  farmerId    Int
+  cropId      Int
+  quantity    Float    // in quintals
+  grade       String?  // A, B, C
+  harvestDate DateTime?
+  askingPrice Float?   // Rs per quintal
+  isAvailable Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  farmer      Farmer  @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  crop        Crop    @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  offers      BuyerOffer[]
+
+  @@index([farmerId])
+  @@index([cropId])
+}
+
+model BuyerRequirement {
+  id           Int      @id @default(autoincrement())
+  buyerId      Int
+  cropId       Int
+  quantityMin  Float
+  quantityMax  Float
+  targetPrice  Float    // Rs per quintal, max they will pay
+  deliveryDate DateTime?
+  district     String?  // preferred supply district
+  description  String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  buyer        Buyer   @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  crop         Crop    @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@index([buyerId])
+  @@index([cropId])
+}
+
+model BuyerOffer {
+  id          Int         @id @default(autoincrement())
+  buyerId     Int
+  inventoryId Int
+  offerPrice  Float       // Rs per quintal
+  quantity    Float
+  status      OfferStatus @default(PENDING)
+  message     String?
+  expiresAt   DateTime?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  buyer       Buyer           @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  inventory   FarmerInventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  transaction Transaction?
+
+  @@index([buyerId])
+  @@index([inventoryId])
+  @@index([status])
+}
+
+model Transaction {
+  id           Int               @id @default(autoincrement())
+  offerId      Int               @unique
+  finalPrice   Float
+  quantity     Float
+  totalAmount  Float
+  status       TransactionStatus @default(INITIATED)
+  completedAt  DateTime?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+
+  offer        BuyerOffer @relation(fields: [offerId], references: [id], onDelete: Cascade)
+}
+
+// ─── FPO AGGREGATION & LOTS ──────────────────────────────────────────────────
+
+model FPOLot {
+  id                Int           @id @default(autoincrement())
+  lotCode           String        @unique // e.g. "#FPO-LOT-001"
+  fpoId             Int
+  cropId            Int
+  buyerId           Int?
+  requirementId     Int?
+  totalQuantity     Float         // in quintals
+  grade             String?       // Grade A (FAQ Standard), etc.
+  offeredPrice      Float         // Rs per quintal
+  estimatedGrossValue Float
+  status            LotStatus     @default(DRAFT)
+  dispatchYard      String?
+  destinationHub    String?
+  dispatchDate      DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  fpo               FPO           @relation(fields: [fpoId], references: [id], onDelete: Cascade)
+  crop              Crop          @relation(fields: [cropId], references: [id], onDelete: Cascade)
+  buyer             Buyer?        @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+  members           FPOLotMember[]
+
+  @@index([fpoId])
+  @@index([cropId])
+  @@index([status])
+}
+
+model FPOLotMember {
+  id               Int      @id @default(autoincrement())
+  lotId            Int
+  farmerId         Int
+  allocatedQty     Float    // in quintals
+  payoutAmount     Float    // Rs payout to farmer
+  status           String   @default("ALLOCATED")
+  createdAt        DateTime @default(now())
+
+  lot              FPOLot   @relation(fields: [lotId], references: [id], onDelete: Cascade)
+  farmer           Farmer   @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+
+  @@unique([lotId, farmerId])
+}
+
+// ─── WEATHER ─────────────────────────────────────────────────────────────────
+
+model WeatherData {
+  id           Int      @id @default(autoincrement())
+  district     String
+  date         DateTime
+  tempMin      Float?
+  tempMax      Float?
+  humidity     Float?   // percentage
+  rainfall     Float?   // mm
+  windSpeed    Float?   // km/h
+  condition    String?  // Sunny, Rainy, etc.
+  source       String?  // API source or "demo"
+  createdAt    DateTime @default(now())
+
+  @@index([district, date])
+}
+
+// ─── RESCUE ──────────────────────────────────────────────────────────────────
+
+model RescueCase {
+  id           Int          @id @default(autoincrement())
+  farmerId     Int
+  cropId       Int
+  description  String
+  quantity     Float?       // affected quantity in quintals
+  status       RescueStatus @default(OPEN)
+  resolvedAt   DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  farmer       Farmer @relation(fields: [farmerId], references: [id], onDelete: Cascade)
+  crop         Crop   @relation(fields: [cropId], references: [id], onDelete: Cascade)
+
+  @@index([farmerId])
+  @@index([status])
+}
